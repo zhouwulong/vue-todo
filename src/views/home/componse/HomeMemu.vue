@@ -1,57 +1,93 @@
 <template>
   <div>
     <div class="nemu">
-      <p class="nemu-list clearfloat"><span class="nemu-span-icon"><i class="icon iconfont icon-suo"></i></span><a class="nemu-name">tomy</a><span class="nemu-number">0</span></p>
-      <p class="nemu-list clearfloat"><span class="nemu-span-icon"><i class="icon iconfont icon-suo"></i></span><a class="nemu-name">tomy</a><span class="nemu-number">0</span></p>
-      <p class="nemu-list clearfloat"><span class="nemu-span-icon"><i class="icon iconfont icon-suo"></i></span><a class="nemu-name">tomy</a><span class="nemu-number">0</span></p>
-      <p class="nemu-list clearfloat"><span class="nemu-span-icon"><i class="icon iconfont icon-suo"></i></span><a class="nemu-name">tomy</a><span class="nemu-number">0</span></p>
+      <p class="nemu-list clearfloat" v-for="(item,index) in menuTab" :key="index" @click="changeMenuone(index)">
+        <span class="nemu-span-icon">
+          <i class="icon iconfont icon-suo"></i>
+        </span>
+        <a class="nemu-name">{{item.name}}</a>
+        <span class="nemu-number">{{item.list.length}}</span>
+      </p>
     </div>
-    <p class="nemu-list-add"><span class="nemu-span-icon"><i class="el-icon-plus"></i></span><a class="nemu-add">添加</a></p>
+    <p class="nemu-list-add">
+      <span class="nemu-span-icon">
+        <i class="el-icon-plus"></i>
+      </span>
+      <a class="nemu-add" @click="adduser">添加</a>
+    </p>
   </div>
 </template>
 
 <script>
 export default {
   name: 'nemu',
+  props: [
+    'menuTab'
+  ],
   data () {
-    return {}
+    return {
+      index: 0
+    }
+  },
+  methods: {
+    initialData () {
+      // this.todoData = JSON.parse(localStorage.getItem('memo'))
+      // let arr = JSON.parse(localStorage.getItem('todo'))
+      // if (arr) {
+      //   this.todoData = arr
+      // }
+      // console.log('this.menuTab: ', this.menuTab)
+    },
+    adduser () {
+      this.menuTab.push({ name: 'newList', list: [] })
+      // this.menuTab
+      this.$emit('add-menu', this.menuTab)
+    },
+    changeMenuone (index) {
+      this.index = index
+      console.log('this.index: ', this.index)
+      this.$emit('my-event', this.index)
+    }
+  },
+  mounted () {
+    this.initialData()
   },
   components: {}
 }
 </script>
 
 <style scoped lang="less">
-.nemu-list{
+.nemu-list {
   height: 50px;
   line-height: 50px;
   border-bottom: 1px solid #908d8d;
   color: #b8b4b4;
-  cursor:pointer;
+  cursor: pointer;
 
   &:hover {
     color: #fff;
 
-    .nemu-number{
+    .nemu-number {
       background-color: #2cc5d2;
     }
   }
 
-  &-add{
+  &-add {
     color: #5da5e7;
     border-bottom: 1px solid #908d8d;
   }
 }
-.nemu-span-icon{
+.nemu-span-icon {
   display: inline-block;
   width: 40px;
   height: 50px;
-  text-align: center
+  text-align: center;
 }
-.nemu-number{
-  float: right;
+.nemu-number {
   margin-right: 15px;
   display: inline-block;
   width: 20px;
+  float: right;
   height: 20px;
   line-height: 20px;
   text-align: center;
