@@ -3,11 +3,12 @@
     <div class="table-head">
       <div class="clearfloat">
         <div class="table-head-left">
-          <a class="head-left-name">anny</a>
+          <a class="head-left-name">{{this.tableMenu.name}}</a>
           <span class="head-left-number">0</span>
         </div>
         <div class="table-head-right">
-          <i class="icon iconfont icon-suo"></i>
+          <i class="icon iconfont icon-suo" :class="{dispalyText:guanIcon}" @click="colenIcon"></i>
+          <i class="icon iconfont icon-kaisuo" :class="{dispalyText:kaiIcon}" @click="openIcon"></i>
           <i class="icon iconfont icon-shanchu"></i>
         </div>
       </div>
@@ -21,8 +22,28 @@
     <div class="table-zt">
       <el-table :data="tableMenu.list" style="width: 100%" :show-header="false">
         <el-table-column width="35">
+          <!-- 开始 -->
+          <template slot-scope="scope">
+            <el-checkbox
+              v-model="scope.row.check"
+              @change="clickChange(scope.row.check,scope.$index)"
+            ></el-checkbox>
+          </template>
+          <!-- 结束 -->
         </el-table-column>
-        <el-table-column prop="mome" label="备忘语"></el-table-column>
+        <el-table-column label="备忘语">
+          <template slot-scope="scope">
+            <span style="margin-right:20px" :class="{classred:scope.row.check}" v-show="scope.$index != modifyindex">{{scope.row.mome}}</span>
+            <input style="margin-right:20px;width:auto" class="inputMemo" v-model="scope.row.mome" type="text" v-show="scope.$index == modifyindex" />
+            <el-link
+              @click="editLink(scope.row,scope.$index)"
+              v-if="!scope.row.check && scope.$index != modifyindex"
+              class="leftMmargin"
+              icon="el-icon-edit"
+            ></el-link>
+            <el-button type="primary" size="mini" v-show="scope.$index == modifyindex" @click="determineBtn(scope.row)">确定</el-button>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="150">
           <template slot-scope="scope">
             <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
@@ -35,12 +56,16 @@
 
 <script>
 export default {
-  name: 'todo-tables',
   data () {
     return {
-      // multipleSelection: [],
-      dataMemoinput: ''
-      // msg: '',
+      dataMemoinput: '',
+      checked: '',
+      current: false,
+      displayTxt: true,
+      kaiIcon: false,
+      guanIcon: true,
+      modifyInput: '',
+      modifyindex: null
     }
   },
   watch: {
@@ -48,41 +73,82 @@ export default {
       this.$emit('index-data', this.tableMenu)
     }
   },
-  props: [
-    'tableMenu',
-    'tableIndex'
-  ],
-  // props: ['table', 'inputName'],
+  props: ['tableMenu', 'tableIndex'],
   methods: {
     initial () {
-      // console.log('this.tableMenu.list: ', this.tableMenu.list)
-      // console.log('this.tableMenu: ', this.tableMenu)
-      // this.list = this.tableMenu.list
-      // console.log('this.list: ', this.list)
+      // console.log(this.tableMenu.list)
+      // for (var i = 0; i < this.tableMenu.list.length; i++) {
+      // console.log('this.tableMenu.list[i].check: ', this.tableMenu.list[i].check)
+      // if (this.tableMenu.list[i].check !== false) {
+      //   this.guanIcon = false
+      // }
+      // }
+    },
+    editLink (row, index) {
+      console.log(row)
+      // $event.displayTxt = row.check
+      this.modifyindex = index
+      console.log('this.modifyindex : ', this.modifyindex)
+    },
+    clickChange (check, index) {
+      console.log('check: ', check)
+      this.current = index
+      this.tableMenu.list = Array.from(this.tableMenu.list)
     },
     handleDelete (index, row) {
       this.tableMenu.list.splice(index, 1)
       // this.tableMenu.list = Array.from(this.tableMenu.list)
       console.log('this.tableMenu.list: ', this.tableMenu.list)
     },
-
+    openIcon () {
+      this.kaiIcon = true
+      this.guanIcon = false
+      // console.log(this.tableMenu.list.check)
+      for (var i = 0; i < this.tableMenu.list.length; i++) {
+        this.tableMenu.list[i].check = true
+        this.tableMenu.list = Array.from(this.tableMenu.list)
+      }
+    },
+    determineBtn (row) {
+      this.modifyindex = null
+      console.log('this.modifyindex: ', this.modifyindex)
+      // this.modifyindex = row.mome
+      this.tableMenu.list = Array.from(this.tableMenu.list)
+    },
+    colenIcon () {
+      this.kaiIcon = false
+      this.guanIcon = true
+      for (var i = 0; i < this.tableMenu.list.length; i++) {
+        this.tableMenu.list[i].check = false
+        this.tableMenu.list = Array.from(this.tableMenu.list)
+      }
+    },
     addData () {
-      // let memovalue = { memo: this.dataMemoinput }
-      // this.tableData.push(memovalue)
-      // this.dataMemoinput = ''
-      // localStorage.setItem('memo', JSON.stringify(this.tableData))
-      // localStorage.getItem('memo')
-      this.tableMenu.list.push({ check: false, mome: this.dataMemoinput })
-      console.log('this.tableMenu.list: ', this.tableMenu.list)
-      // this.tableMenu.list = Array.from(this.tableMenu.list)
+      if (this.dataMemoinput === '') {
+        this.$message({
+          message: '输入框不能为空',
+          type: 'warning',
+          center: true,
+          offset: 300
+        })
+      } else {
+        this.tableMenu.list.push({ check: false, mome: this.dataMemoinput })
+        // console.log("this.tableMenu.list: ", this.tableMenu.list);
+        // this.tableMenu.list = Array.from(this.tableMenu.list)
+      }
+    }
+    // 开始
+    // 结束
+  },
+  updated () {
+    for (var i = 0; i < this.tableMenu.list.length; i++) {
+      if (this.tableMenu.list[i].check !== false) {
+        this.guanIcon = false
+        this.kaiIcon = true
+      }
     }
   },
-  // updated () {
-  //   this.initial()
-  // },
-  mounted () {
-    // console.log('this.tableMenu: ', this.tableMenu)
-  },
+  mounted () {},
   components: {}
 }
 </script>
@@ -92,6 +158,20 @@ export default {
 //     height: 50px;
 //     line-height: 50px;
 // }
+.inputMemo{
+  border: none;
+  height: 25px;
+  border-bottom:1px solid #ddd;
+}
+.leftMargin {
+  margin-left: 20px;
+}
+.dispalyText {
+  display: none;
+}
+.classred {
+  text-decoration: line-through;
+}
 .table-head {
   background: linear-gradient(180deg, #d0edf5, #e1e5f0);
   div:nth-of-type(1) {
@@ -120,7 +200,8 @@ export default {
   }
   .table-head-right {
     float: right;
-    .icon-suo {
+    .icon-suo,
+    .icon-kaisuo {
       margin-right: 30px;
     }
     .icon-shanchu {

@@ -11,9 +11,10 @@
     </div>
     <p class="nemu-list-add">
       <span class="nemu-span-icon">
-        <i class="el-icon-plus"></i>
+        <i class="el-icon-plus" @click="adduser"></i>
       </span>
-      <a class="nemu-add" @click="adduser">添加</a>
+      <a class="nemu-add" :class="{displayAdd:memuAdd}" @click="menuAdd">添加</a>
+      <input type="text" v-model="inputAdd" class="inputAdd" placeholder="请输入名称" :class="{displayAdd:memuInput}">
     </p>
   </div>
 </template>
@@ -26,7 +27,10 @@ export default {
   ],
   data () {
     return {
-      index: 0
+      index: 0,
+      memuAdd: false,
+      memuInput: true,
+      inputAdd: ''
     }
   },
   methods: {
@@ -39,9 +43,23 @@ export default {
       // console.log('this.menuTab: ', this.menuTab)
     },
     adduser () {
-      this.menuTab.push({ name: 'newList', list: [] })
-      // this.menuTab
-      this.$emit('add-menu', this.menuTab)
+      if (this.inputAdd === '') {
+        this.$message({
+          message: '输入框不能为空',
+          type: 'warning',
+          center: true,
+          offset: 300
+        })
+      } else {
+        this.menuTab.push({ name: this.inputAdd, list: [] })
+        this.$emit('add-menu', this.menuTab)
+        this.memuAdd = false
+        this.memuInput = true
+      }
+    },
+    menuAdd () {
+      this.memuAdd = true
+      this.memuInput = false
     },
     changeMenuone (index) {
       this.index = index
@@ -57,6 +75,12 @@ export default {
 </script>
 
 <style scoped lang="less">
+.displayAdd{
+  display: none
+}
+.inputAdd{
+  width: 150px
+}
 .nemu-list {
   height: 50px;
   line-height: 50px;

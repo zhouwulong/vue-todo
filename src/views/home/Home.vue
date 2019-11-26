@@ -94,7 +94,7 @@ export default {
   },
   watch: {
     todoData: function (data) {
-      console.log('data: ', data)
+      // console.log('data: ', data)
       localStorage.setItem('todo', JSON.stringify(data))
     }
   },
